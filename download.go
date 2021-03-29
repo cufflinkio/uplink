@@ -9,6 +9,7 @@ import (
 	"github.com/zeebo/errs"
 
 	"storj.io/uplink/private/metaclient"
+
 	"storj.io/uplink/private/storage/streams"
 	"storj.io/uplink/private/stream"
 )
@@ -104,6 +105,12 @@ type Download struct {
 	object   *Object
 	bucket   string
 	streams  *streams.Store
+}
+
+// GetClient is a Cufflink function that is used to access the private streams
+// attribute on the Download struct
+func (download *Download) GetClient() *metaclient.Client {
+	return download.streams.GetMetainfoClient()
 }
 
 // Info returns the last information about the object.

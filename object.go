@@ -30,6 +30,10 @@ type Object struct {
 
 	System SystemMetadata
 	Custom CustomMetadata
+
+	// Cufflink modification which allows the server to return a new apikey
+	// to the client
+	CufflinkUpdatedMacaroon []byte
 }
 
 // SystemMetadata contains information about the object that cannot be changed directly.
@@ -151,5 +155,8 @@ func convertObject(obj *metaclient.Object) *Object {
 			ContentLength: obj.Size,
 		},
 		Custom: obj.Metadata,
+		// Cufflink modification which allows the server to return an
+		// updated api key to the client
+		CufflinkUpdatedMacaroon: obj.CufflinkUpdatedMacaroon,
 	}
 }

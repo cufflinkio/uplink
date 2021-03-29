@@ -26,6 +26,9 @@ type RawObjectItem struct {
 	EncryptedMetadataNonce        storj.Nonce
 	EncryptedMetadataEncryptedKey []byte
 	EncryptedMetadata             []byte
+	// Cufflink Modification that allows the server to return an new
+	// macaroon when the current one has expired
+	CufflinkUpdatedMacaroon []byte
 
 	EncryptionParameters storj.EncryptionParameters
 	RedundancyScheme     storj.RedundancyScheme

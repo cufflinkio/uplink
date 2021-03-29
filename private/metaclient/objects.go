@@ -50,7 +50,11 @@ func (db *DB) GetObjectIPs(ctx context.Context, bucket Bucket, key string) (_ *G
 }
 
 // CreateObject creates an uploading object and returns an interface for uploading Object information.
-func (db *DB) CreateObject(ctx context.Context, bucket, key string, createInfo *CreateObject) (object *MutableObject, err error) {
+func (db *DB) CreateObject(
+	ctx context.Context,
+	bucket, key string,
+	createInfo *CreateObject,
+) (object *MutableObject, err error) {
 	defer mon.Task()(&ctx)(&err)
 
 	if bucket == "" {
@@ -163,13 +167,23 @@ func (db *DB) UpdateObjectMetadata(ctx context.Context, bucket, key string, newM
 	}
 
 	encryptionParameters := objectInfo.EncryptionParameters
-	encryptedKey, err := encryption.EncryptKey(&metadataKey, encryptionParameters.CipherSuite, derivedKey, &encryptedKeyNonce)
+	encryptedKey, err := encryption.EncryptKey(
+		&metadataKey,
+		encryptionParameters.CipherSuite,
+		derivedKey,
+		&encryptedKeyNonce,
+	)
 	if err != nil {
 		return err
 	}
 
 	// encrypt metadata with the content encryption key and zero nonce.
-	encryptedStreamInfo, err := encryption.Encrypt(streamInfo, encryptionParameters.CipherSuite, &metadataKey, &storj.Nonce{})
+	encryptedStreamInfo, err := encryption.Encrypt(
+		streamInfo,
+		encryptionParameters.CipherSuite,
+		&metadataKey,
+		&storj.Nonce{},
+	)
 	if err != nil {
 		return err
 	}
@@ -234,7 +248,11 @@ func (db *DB) ListPendingObjects(ctx context.Context, bucket string, options Lis
 }
 
 // ListPendingObjectStreams lists streams for a specific pending object key.
-func (db *DB) ListPendingObjectStreams(ctx context.Context, bucket string, options ListOptions) (list ObjectList, err error) {
+func (db *DB) ListPendingObjectStreams(
+	ctx context.Context,
+	bucket string,
+	options ListOptions,
+) (list ObjectList, err error) {
 	defer mon.Task()(&ctx)(&err)
 
 	if bucket == "" {
@@ -282,7 +300,12 @@ func (db *DB) ListPendingObjectStreams(ctx context.Context, bucket string, optio
 	}, nil
 }
 
-func (db *DB) pendingObjectsFromRawObjectList(ctx context.Context, items []RawObjectListItem, pi *encryption.PrefixInfo, startAfter string) (objectList []Object, err error) {
+func (db *DB) pendingObjectsFromRawObjectList(
+	ctx context.Context,
+	items []RawObjectListItem,
+	pi *encryption.PrefixInfo,
+	startAfter string,
+) (objectList []Object, err error) {
 	objectList = make([]Object, 0, len(items))
 
 	for _, item := range items {
@@ -385,7 +408,12 @@ func (db *DB) ListObjects(ctx context.Context, bucket string, options ListOption
 	}, nil
 }
 
-func (db *DB) objectsFromRawObjectList(ctx context.Context, items []RawObjectListItem, pi *encryption.PrefixInfo, startAfter string) (objectList []Object, err error) {
+func (db *DB) objectsFromRawObjectList(
+	ctx context.Context,
+	items []RawObjectListItem,
+	pi *encryption.PrefixInfo,
+	startAfter string,
+) (objectList []Object, err error) {
 	objectList = make([]Object, 0, len(items))
 
 	for _, item := range items {
@@ -443,7 +471,11 @@ type DownloadInfo struct {
 }
 
 // DownloadObject gets object information, lists segments and downloads the first segment.
-func (db *DB) DownloadObject(ctx context.Context, bucket, key string, options DownloadOptions) (info DownloadInfo, err error) {
+func (db *DB) DownloadObject(
+	ctx context.Context,
+	bucket, key string,
+	options DownloadOptions,
+) (info DownloadInfo, err error) {
 	defer mon.Task()(&ctx)(&err)
 
 	if bucket == "" {
@@ -470,7 +502,12 @@ func (db *DB) DownloadObject(ctx context.Context, bucket, key string, options Do
 	return db.newDownloadInfo(ctx, bucket, key, resp, options.Range)
 }
 
-func (db *DB) newDownloadInfo(ctx context.Context, bucket, key string, response DownloadObjectResponse, streamRange StreamRange) (DownloadInfo, error) {
+func (db *DB) newDownloadInfo(
+	ctx context.Context,
+	bucket, key string,
+	response DownloadObjectResponse,
+	streamRange StreamRange,
+) (DownloadInfo, error) {
 	object, err := db.objectFromRawObjectItem(ctx, bucket, key, response.Object)
 	if err != nil {
 		return DownloadInfo{}, err
@@ -522,16 +559,21 @@ func (db *DB) GetObject(ctx context.Context, bucket, key string) (info Object, e
 	return db.objectFromRawObjectItem(ctx, bucket, key, objectInfo)
 }
 
-func (db *DB) objectFromRawObjectItem(ctx context.Context, bucket, key string, objectInfo RawObjectItem) (Object, error) {
+func (db *DB) objectFromRawObjectItem(
+	ctx context.Context,
+	bucket, key string,
+	objectInfo RawObjectItem,
+) (Object, error) {
 	if objectInfo.Bucket == "" { // zero objectInfo
 		return Object{}, nil
 	}
 
 	object := Object{
-		Version:  objectInfo.Version,
-		Bucket:   Bucket{Name: bucket},
-		Path:     key,
-		IsPrefix: false,
+		CufflinkUpdatedMacaroon: objectInfo.CufflinkUpdatedMacaroon,
+		Version:                 objectInfo.Version,
+		Bucket:                  Bucket{Name: bucket},
+		Path:                    key,
+		IsPrefix:                false,
 
 		Created:  objectInfo.Modified, // TODO: use correct field
 		Modified: objectInfo.Modified, // TODO: use correct field
@@ -580,7 +622,13 @@ func (db *DB) objectFromRawObjectItem(ctx context.Context, bucket, key string, o
 	return object, nil
 }
 
-func (db *DB) objectFromRawObjectListItem(bucket string, path storj.Path, listItem RawObjectListItem, stream *pb.StreamInfo, streamMeta pb.StreamMeta) (Object, error) {
+func (db *DB) objectFromRawObjectListItem(
+	bucket string,
+	path storj.Path,
+	listItem RawObjectListItem,
+	stream *pb.StreamInfo,
+	streamMeta pb.StreamMeta,
+) (Object, error) {
 	object := Object{
 		Version:  uint32(listItem.Version),
 		Bucket:   Bucket{Name: bucket},
@@ -657,7 +705,11 @@ func (object *MutableObject) CreateStream(ctx context.Context) (_ *MutableStream
 }
 
 // CreateDynamicStream creates a new dynamic stream for the object.
-func (object *MutableObject) CreateDynamicStream(ctx context.Context, metadata SerializableMeta, expires time.Time) (_ *MutableStream, err error) {
+func (object *MutableObject) CreateDynamicStream(
+	ctx context.Context,
+	metadata SerializableMeta,
+	expires time.Time,
+) (_ *MutableStream, err error) {
 	defer mon.Task()(&ctx)(&err)
 	return &MutableStream{
 		info: object.info,
@@ -710,7 +762,11 @@ func (db *DB) typedDecryptStreamInfo(ctx context.Context, bucket string, unencry
 }
 
 // getEncryptedKeyAndNonce returns key and nonce directly if exists, otherwise try to get them from SegmentMeta.
-func getEncryptedKeyAndNonce(metadataKey []byte, metadataNonce storj.Nonce, m *pb.SegmentMeta) (storj.EncryptedPrivateKey, *storj.Nonce) {
+func getEncryptedKeyAndNonce(
+	metadataKey []byte,
+	metadataNonce storj.Nonce,
+	m *pb.SegmentMeta,
+) (storj.EncryptedPrivateKey, *storj.Nonce) {
 	if len(metadataKey) > 0 {
 		return storj.EncryptedPrivateKey(metadataKey), &metadataNonce
 	}

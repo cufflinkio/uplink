@@ -2,6 +2,8 @@ module storj.io/uplink
 
 go 1.17
 
+replace storj.io/common => ../common
+
 require (
 	github.com/spacemonkeygo/monkit/v3 v3.0.17
 	github.com/stretchr/testify v1.7.0

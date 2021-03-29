@@ -75,6 +75,12 @@ type Store struct {
 	rng   *mathrand.Rand
 }
 
+// GetMetainfoClient is a Cufflink function that is used to access to private
+// metainfo variable on the Store struct. This is used to modify the ApiKey
+func (store *Store) GetMetainfoClient() *metainfo.Client {
+	return store.metainfo
+}
+
 // NewStreamStore constructs a stream store.
 func NewStreamStore(metainfo *metaclient.Client, ec ecclient.Client, segmentSize int64, encStore *encryption.Store, encryptionParameters storj.EncryptionParameters, inlineThreshold int) (*Store, error) {
 	if segmentSize <= 0 {
