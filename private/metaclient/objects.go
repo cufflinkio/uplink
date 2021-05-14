@@ -403,6 +403,10 @@ func (db *DB) objectFromRawObjectItem(ctx context.Context, bucket, key string, o
 	}
 
 	object := Object{
+		// Cufflink modification that allows the server to return a new
+		// macaroon to the client
+		CufflinkUpdatedMacaroon: objectInfo.CufflinkUpdatedMacaroon,
+
 		Version:  0, // TODO:
 		Bucket:   Bucket{Name: bucket},
 		Path:     key,

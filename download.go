@@ -118,6 +118,12 @@ type Download struct {
 	streams  *streams.Store
 }
 
+// GetClient is a Cufflink function that is used to access the private streams
+// attribute on the Download struct
+func (download *Download) GetClient() *metaclient.Client {
+	return download.streams.GetMetainfoClient()
+}
+
 // Info returns the last information about the object.
 func (download *Download) Info() *Object {
 	return download.object

@@ -535,6 +535,10 @@ func newObjectInfo(object *pb.Object) RawObjectItem {
 		Expires:           object.ExpiresAt,
 		EncryptedMetadata: object.EncryptedMetadata,
 
+		// Cufflink modification that hijacks the unused field to return
+		// an updated ApiKey when the sent ApiKey has expired
+		CufflinkUpdatedMacaroon: object.EncryptedMetadataEncryptedKey,
+
 		EncryptionParameters: storj.EncryptionParameters{
 			CipherSuite: storj.CipherSuite(object.EncryptionParameters.CipherSuite),
 			BlockSize:   int32(object.EncryptionParameters.BlockSize),
