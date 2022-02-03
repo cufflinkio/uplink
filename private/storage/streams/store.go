@@ -77,7 +77,7 @@ type Store struct {
 
 // GetMetainfoClient is a Cufflink function that is used to access to private
 // metainfo variable on the Store struct. This is used to modify the ApiKey
-func (store *Store) GetMetainfoClient() *metainfo.Client {
+func (store *Store) GetMetainfoClient() *metaclient.Client {
 	return store.metainfo
 }
 
